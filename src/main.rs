@@ -9,8 +9,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect("http://localhost:4444")
         .await?;
 
-    // Go to NAFDAC's website.
+    // Go to NAFDAC's drug product website.
     client.goto("https://greenbook.nafdac.gov.ng").await?;
+
+    // Select number of product displayed entries.
+    let select_element = client
+        .find(Locator::Css(
+            "div.dataTables_wrapper div.dataTables_length select",
+        ))
+        .await?;
+    
+    // Display 100 items.
+    select_element
+        .clone()
+        .select_by_label("100")
+        .await?;
+
+    // Get display text after selection
+    if let Some(initial_text) = select_element.prop("value").await? {
+        println!("The selected option {}", initial_text);
+    }
+
     let  table_body: Element = client
         .wait()
         .at_most(Duration::from_secs(5))
@@ -33,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let value = row.html(false).await?;
         println!("Result: {}", value)
     }
+
     println!("{}", tbody_rows.len());
 
     client.close().await?;
