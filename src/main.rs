@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use scraper::{Html, Selector};
 use fantoccini::{ClientBuilder, Locator, elements::Element};
 
 #[tokio::main]
