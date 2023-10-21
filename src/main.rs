@@ -1,49 +1,43 @@
-use reqwest;
+use std::time::Duration;
+
 use scraper::{Html, Selector};
+use fantoccini::{ClientBuilder, Locator, elements::Element};
 
-fn main() {
-    let response = reqwest::blocking::get(
-        "https://greenbook.nafdac.gov.ng",
-    )
-    .unwrap()
-    .text()
-    .unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect to webdriver instance that is listening on port 4444
+    let client = ClientBuilder::native()
+        .connect("http://localhost:4444")
+        .await?;
 
-    let document = Html::parse_document(&response);
-    println!("Raw HTML: {:?}", document.html());
-    let table_head_selector = Selector::parse("table.data-table>thead>tr>th").unwrap();
+    // Go to NAFDAC's website.
+    client.goto("https://greenbook.nafdac.gov.ng").await?;
+    let  table_body: Element = client
+        .wait()
+        .at_most(Duration::from_secs(5))
+        .every(Duration::from_millis(100))
+        .for_element(Locator::Css(
+            "table.dataTable tbody tr",
+        ))
+        .await?;
 
-    let product_table_headers = document.select(&table_head_selector).map(|x| x.inner_html());
-    product_table_headers
-                .enumerate()
-                .for_each(|(i, name)| println!("{}. {}", i, name));
+    let content = table_body.html(false).await?;
+    println!("{}", content);
 
-    let data_table_body_selector = Selector::parse("table.data-table tbody tr").unwrap();
-    // let product_table_body = document.select(&data_table_body_selector);
-    let tr_selector = Selector::parse("tr").unwrap();
+    let tbody_rows = client
+        .find_all(Locator::Css(
+            "table.dataTable tbody tr"
+        ))
+        .await?;
 
-    //let table_body = document.select(&data_table_body_selector).next().unwrap();
-    for element in document.select(&data_table_body_selector) {
-        println!("{:?}", element.inner_html());
-        for row in element.select(&tr_selector) {
-            println!("{:?}", row.html());
-        }
-        //let story_txt = element.text().collect::<Vec<_>>();
-        // println!("{:?}", element.);
-        //println!("{}", element.value().name());
+    for row in tbody_rows.as_slice() {
+        let value = row.html(false).await?;
+        println!("Result: {}", value)
     }
+    println!("{}", tbody_rows.len());
 
-    // if let Some(p) = product_table_body.peekable().peek_mut() {
-    //     if p.has_children() {
-    //         p.children().for_each(|el| println!("{:?}", el.value()))
-    //     }
-    // }
+    client.close().await?;
 
-    // for val in product_table_body {
-    //     let row_selector = Selector::parse("tr").unwrap();
-    //     let rows: Vec<_> = val.select(&row_selector).collect();
-
-    //     println!("{}",rows.len());
-    // }
-
+    Ok(())
 }
+
