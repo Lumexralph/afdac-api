@@ -3,25 +3,10 @@
 #######################
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-GAZELLE_RUST_COMMIT = "a4923812aa2a16b3eb854ec69c75081a15026c4e"
-
-GAZELLE_RUST_SHA256 = "4ec93cd95ed1c791c2a885226dcd04ba6799b2bd19ede2746176918aaecc637e"
-
-http_archive(
-    name = "gazelle_rust",
-    sha256 = GAZELLE_RUST_SHA256,
-    strip_prefix = "gazelle_rust-{}".format(GAZELLE_RUST_COMMIT),
-    url = "https://github.com/Calsign/gazelle_rust/archive/{}.zip".format(GAZELLE_RUST_COMMIT),
-)
-
-# To find additional information on this release or newer ones visit:
-# https://github.com/bazelbuild/rules_rust/releases
 http_archive(
     name = "rules_rust",
-    # NOTE: This patch is currently necessary for gazelle_rust to parse crate_universe lockfiles.
-    patches = ["@gazelle_rust//patches:rules_rust.patch"],
-    sha256 = "6357de5982dd32526e02278221bb8d6aa45717ba9bbacf43686b130aa2c72e1e",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.30.0/rules_rust-v0.30.0.tar.gz"],
+    sha256 = "75177226380b771be36d7efc538da842c433f14cd6c36d7660976efb53defe86",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.34.1/rules_rust-v0.34.1.tar.gz"],
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
@@ -56,10 +41,3 @@ crate_repositories()
 # Load gazelle_rust transitive dependencies (includes gazelle). You can also load gazelle yourself,
 # before these macros.
 
-load("@gazelle_rust//:deps1.bzl", "gazelle_rust_dependencies1")
-
-gazelle_rust_dependencies1()
-
-load("@gazelle_rust//:deps2.bzl", "gazelle_rust_dependencies2")
-
-gazelle_rust_dependencies2()
