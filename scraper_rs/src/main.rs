@@ -1,49 +1,77 @@
-use reqwest;
+use std::time::Duration;
+
+use fantoccini::{ClientBuilder, Locator, elements::Element};
 use scraper::{Html, Selector};
 
-fn main() {
-    let response = reqwest::blocking::get(
-        "https://greenbook.nafdac.gov.ng",
-    )
-    .unwrap()
-    .text()
-    .unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect to webdriver instance that is listening on port 4444
+    let client = ClientBuilder::native()
+        .connect("http://localhost:4444")
+        .await?;
 
-    let document = Html::parse_document(&response);
-    println!("Raw HTML: {:?}", document.html());
-    let table_head_selector = Selector::parse("table.data-table>thead>tr>th").unwrap();
+    // Go to NAFDAC's drug product website.
+    client.goto("https://greenbook.nafdac.gov.ng").await?;
 
-    let product_table_headers = document.select(&table_head_selector).map(|x| x.inner_html());
-    product_table_headers
-                .enumerate()
-                .for_each(|(i, name)| println!("{}. {}", i, name));
+    // Select number of product displayed entries.
+    let select_element = client
+        .find(Locator::Css(
+            "div.dataTables_wrapper div.dataTables_length select",
+        ))
+        .await?;
 
-    let data_table_body_selector = Selector::parse("table.data-table tbody tr").unwrap();
-    // let product_table_body = document.select(&data_table_body_selector);
-    let tr_selector = Selector::parse("tr").unwrap();
+    // Display 100 items.
+    select_element
+        .clone()
+        .select_by_label("100")
+        .await?;
 
-    //let table_body = document.select(&data_table_body_selector).next().unwrap();
-    for element in document.select(&data_table_body_selector) {
-        println!("{:?}", element.inner_html());
-        for row in element.select(&tr_selector) {
-            println!("{:?}", row.html());
-        }
-        //let story_txt = element.text().collect::<Vec<_>>();
-        // println!("{:?}", element.);
-        //println!("{}", element.value().name());
+    // Get display text after selection
+    if let Some(initial_text) = select_element.prop("value").await? {
+        println!("The selected option {}", initial_text);
     }
 
-    // if let Some(p) = product_table_body.peekable().peek_mut() {
-    //     if p.has_children() {
-    //         p.children().for_each(|el| println!("{:?}", el.value()))
-    //     }
+    let  table_body: Element = client
+        .wait()
+        .at_most(Duration::from_secs(5))
+        .every(Duration::from_millis(100))
+        .for_element(Locator::Css(
+            "table.dataTable tbody tr",
+        ))
+        .await?;
+
+    let tbody_rows = client
+        .find_all(Locator::Css(
+            "table.dataTable tbody tr"
+        ))
+        .await?;
+
+    let td_selector = Selector::parse("td").unwrap();
+    for row in tbody_rows.as_slice() {
+        let html = row.html(false).await?;
+        let raw_string = format!(r#"<table>{}</table>"#, html);
+        let fragment = Html::parse_fragment(&raw_string);
+
+        println!("{}", "===========================");
+        for element in fragment.select(&td_selector) {
+            println!("{}", element.text().collect::<Vec<_>>().join(","));
+        }
+        // let value = row.html(false).await?;
+        // println!("Result: {}", value)
+    }
+
+    println!("{}", tbody_rows.len());
+
+    client.close().await?;
+
+    // let html = r#"<table><tr role="row" class="odd"><td class="sorting_1 dtr-control">Afrab Oral Rehydration Salt</td><td><a href="/ingredient/products/191">Oral Rehydration Salts</a></td><td><a href="/products/details/2971">A11-100055</a></td><td>Granules</td><td>Oral</td><td>20.5 g</td><td><a href="/applicant/products/82">Afrab-Chem Limited</a></td><td>2021-03-29</td><td>Active</td></tr></table>"#;
+
+    // let fragment = Html::parse_fragment(html);
+    // let selector = Selector::parse("td").unwrap();
+
+    // for element in fragment.select(&selector) {
+    //     println!("{}", element.value().name());
     // }
 
-    // for val in product_table_body {
-    //     let row_selector = Selector::parse("tr").unwrap();
-    //     let rows: Vec<_> = val.select(&row_selector).collect();
-
-    //     println!("{}",rows.len());
-    // }
-
+    Ok(())
 }
