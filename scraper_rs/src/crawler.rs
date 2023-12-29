@@ -77,6 +77,9 @@ pub fn query(input: &str) -> Result<()> {
         let attrs = element.get_attributes()?.unwrap();
         is_next_button_active = !attrs.iter().any(|attr| attr.contains("disabled"));
         element.click()?;
+
+        // NOTE: you can only fetch the body after it's been downloaded.
+        // See: https://github.com/rust-headless-chrome/rust-headless-chrome/blob/f8012ec4ed867ccc0efa6b262723363afd775011/tests/simple.rs#L671
         sleep(Duration::from_secs(5));
     }
 
