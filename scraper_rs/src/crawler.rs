@@ -5,9 +5,11 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use anyhow::Result;
+use chrono::{naive::NaiveDate, DateTime, Utc};
 use headless_chrome::browser::tab::ResponseHandler;
 use headless_chrome::protocol::cdp::Network::{GetResponseBodyReturnObject, ResourceType::Xhr};
 use headless_chrome::{Browser, LaunchOptions};
+use serde::{Deserialize, Serialize};
 
 const NAFDAC_DRUG_PRODUCT_URL: &str = "https://greenbook.nafdac.gov.ng";
 
@@ -87,62 +89,87 @@ pub fn query(input: &str) -> Result<()> {
     Ok(())
 }
 
-struct DrugProductData {
-    data: Vec<DrugProduct>,
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+struct DrugProductData<'a> {
+    data: Vec<DrugProduct<'a>>,
 }
 
-struct DrugProduct {
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+struct DrugProduct<'a> {
     product_id: u64,
     ingredient_id: u64,
     manufacturer_id: u64,
-    product_name: &str,
+    product_name: &'a str,
     form_id: u64,
-    strength: &str,
-    nafdac_reg_no: &str,
+    strength: &'a str,
+    nafdac_reg_no: &'a str,
     product_category_id: u32,
     marketing_category_id: u32,
     applicant_id: u64,
-    approval_date: "2021-03-01",
-    expiry_date: "2026-02-28",
+    #[serde(default)]
+    approval_date: NaiveDate,
+    #[serde(default)]
+    expiry_date: NaiveDate,
     product_description: String,
-    pack_size: &str,
-    biosimilar: &str,
-    atc: &str,
-    created_at: "2022-10-24T11:27:41.000000Z",
-    updated_at: "-000001-11-30T00:00:00.000000Z",
-    ingredient: Ingredient,
-    form: Form,
-    applicant: Applicant,
-    route: Route,
-    status: &str, // should be enum
+    pack_size: &'a str,
+    biosimilar: &'a str,
+    atc: &'a str,
+    #[serde(default)]
+    created_at: DateTime<Utc>,
+    #[serde(default)]
+    updated_at: DateTime<Utc>,
+    ingredient: Ingredient<'a>,
+    form: Form<'a>,
+    applicant: Applicant<'a>,
+    route: Route<'a>,
+    status: &'a str, // should be enum
 }
 
-struct  Applicant {
-        id: u64,
-        name: &str,
-        address: &str,
-        created_at: "2022-05-07T02:03:01.000000Z",
-        updated_at: "2022-06-17T04:26:24.000000Z",
-}
-
-struct Route {
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+struct Applicant<'a> {
     id: u64,
-    name: &str,
-    updated_at: "2022-06-17T04:26:24.000000Z",
-    created_at: "2022-06-17T04:26:24.000000Z",
+    name: &'a str,
+    address: &'a str,
+    #[serde(default)]
+    created_at: DateTime<Utc>,
+    #[serde(default)]
+    updated_at: DateTime<Utc>,
 }
 
-struct Ingredient {
-    id: u32, // ingredient_id
-    name: &str, // ingredient_name
-    synonym: &str,
-    updated_at: "2022-07-01T15:09:54.000000Z",
-    created_at: "-000001-11-30T00:00:00.000000Z",
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+struct Route<'a> {
+    id: u64,
+    name: &'a str,
+    #[serde(default)]
+    updated_at: DateTime<Utc>,
+    #[serde(default)]
+    created_at: DateTime<Utc>,
 }
 
-struct Form {
-    id: u32, // form_id
-    name: &str, // form_name
-    updated_at: "2022-07-01T15:09:54.000000Z",
-    created_at: "-000001-11-30T00:00:00.000000Z",
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+struct Ingredient<'a> {
+    id: u32,       // ingredient_id
+    name: &'a str, // ingredient_name
+    synonym: &'a str,
+    #[serde(default)]
+    updated_at: DateTime<Utc>,
+    #[serde(default)]
+    created_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+struct Form<'a> {
+    id: u32,       // form_id
+    name: &'a str, // form_name
+    #[serde(default)]
+    updated_at: DateTime<Utc>,
+    #[serde(default)]
+    created_at: DateTime<Utc>,
 }
