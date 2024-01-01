@@ -1,7 +1,9 @@
 use anyhow::{Result, Ok};
 use serde_json::{json, Value};
 
-mod crawler;
+use crate::crawler::{query, DrugProductData};
+
+pub mod crawler;
 
 fn main() -> Result<()> {
     // let input = "100";
@@ -1567,8 +1569,8 @@ fn main() -> Result<()> {
     "#;
 
     // Parse the string of data into serde_json::Value.
-    let v: Value = serde_json::from_str(product_data)?;
-    println!("v: {:?}", v["data"]);
+    let v: DrugProductData = serde_json::from_str(product_data)?;
+    println!("v: {:?}", v);
 
     Ok(())
 }

@@ -89,38 +89,120 @@ pub fn query(input: &str) -> Result<()> {
     Ok(())
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
-struct DrugProductData<'a> {
+pub struct DrugProductData<'a> {
+    #[serde(bound(deserialize = "'de: 'a"))]
     data: Vec<DrugProduct<'a>>,
 }
 
+mod timestamp_format {
+    use chrono::{DateTime, Utc, NaiveDateTime};
+    use serde::{self, Deserialize, Serializer, Deserializer};
+
+    const FORMAT: &'static str = "%Y-%m-%dT%H:%M:%S%z";
+
+    // The signature of a serialize_with function must follow the pattern:
+    //
+    //    fn serialize<S>(&T, S) -> Result<S::Ok, S::Error>
+    //    where
+    //        S: Serializer
+    //
+    // although it may also be generic over the input types T.
+    pub fn serialize<S>(
+        date: &DateTime<Utc>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let s = format!("{}", date.format(FORMAT));
+        serializer.serialize_str(&s)
+    }
+
+    // The signature of a deserialize_with function must follow the pattern:
+    //
+    //    fn deserialize<'de, D>(D) -> Result<T, D::Error>
+    //    where
+    //        D: Deserializer<'de>
+    //
+    // although it may also be generic over the output types T.
+    pub fn deserialize<'de, D>(
+        deserializer: D,
+    ) -> Result<DateTime<Utc>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let dt = NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
+        Ok(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
+    }
+}
+
+mod date_format {
+    use chrono::NaiveDate;
+    use serde::{self, Deserialize, Serializer, Deserializer};
+
+    const FORMAT: &'static str = "%Y-%m-%d";
+
+    // The signature of a serialize_with function must follow the pattern:
+    //
+    //    fn serialize<S>(&T, S) -> Result<S::Ok, S::Error>
+    //    where
+    //        S: Serializer
+    //
+    // although it may also be generic over the input types T.
+    pub fn serialize<S>(
+        date: &NaiveDate,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let s = format!("{}", date.format(FORMAT));
+        serializer.serialize_str(&s)
+    }
+
+    // The signature of a deserialize_with function must follow the pattern:
+    //
+    //    fn deserialize<'de, D>(D) -> Result<T, D::Error>
+    //    where
+    //        D: Deserializer<'de>
+    //
+    // although it may also be generic over the output types T.
+    pub fn deserialize<'de, D>(
+        deserializer: D,
+    ) -> Result<NaiveDate, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let dt = NaiveDate::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
+        Ok(dt)
+    }
+}
+
+
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
 struct DrugProduct<'a> {
     product_id: u64,
     ingredient_id: u64,
     manufacturer_id: u64,
-    product_name: &'a str,
-    form_id: u64,
-    strength: &'a str,
+    product_name: String,
+    form_id: &'a str,
+    strength: String,
+    #[serde(rename(deserialize = "NAFDAC"))]
     nafdac_reg_no: &'a str,
     product_category_id: u32,
     marketing_category_id: u32,
     applicant_id: u64,
-    #[serde(default)]
+    #[serde(with = "date_format")]
     approval_date: NaiveDate,
-    #[serde(default)]
+    #[serde(with = "date_format")]
     expiry_date: NaiveDate,
     product_description: String,
     pack_size: &'a str,
-    biosimilar: &'a str,
     atc: &'a str,
-    #[serde(default)]
-    created_at: DateTime<Utc>,
-    #[serde(default)]
-    updated_at: DateTime<Utc>,
+    smpc: String,
     ingredient: Ingredient<'a>,
     form: Form<'a>,
     applicant: Applicant<'a>,
@@ -129,47 +211,28 @@ struct DrugProduct<'a> {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
 struct Applicant<'a> {
     id: u64,
     name: &'a str,
-    address: &'a str,
-    #[serde(default)]
-    created_at: DateTime<Utc>,
-    #[serde(default)]
-    updated_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
 struct Route<'a> {
     id: u64,
     name: &'a str,
-    #[serde(default)]
-    updated_at: DateTime<Utc>,
-    #[serde(default)]
-    created_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
 struct Ingredient<'a> {
-    id: u32,       // ingredient_id
-    name: &'a str, // ingredient_name
+    #[serde(rename(deserialize = "ingredient_id"))]
+    id: u32,
+    #[serde(rename(deserialize = "ingredient_name"))]
+    name: String,
     synonym: &'a str,
-    #[serde(default)]
-    updated_at: DateTime<Utc>,
-    #[serde(default)]
-    created_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
 struct Form<'a> {
     id: u32,       // form_id
     name: &'a str, // form_name
-    #[serde(default)]
-    updated_at: DateTime<Utc>,
-    #[serde(default)]
-    created_at: DateTime<Utc>,
 }
