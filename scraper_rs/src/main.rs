@@ -6,8 +6,8 @@ use crate::crawler::{query, DrugProductData};
 pub mod crawler;
 
 fn main() -> Result<()> {
-    // let input = "100";
-    // crawler::query(input)
+    let input = "100";
+    let res = query(input);
     let product_data = r#"
     {
         "draw": 2,
@@ -1569,8 +1569,8 @@ fn main() -> Result<()> {
     "#;
 
     // Parse the string of data into serde_json::Value.
-    let v: DrugProductData = serde_json::from_str(product_data)?;
-    println!("v: {:?}", v);
+    let _: DrugProductData = serde_json::from_str(product_data)?;
+    // println!("v: {:?}", v);
 
-    Ok(())
+    res
 }

@@ -5,7 +5,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use anyhow::Result;
-use chrono::{naive::NaiveDate, DateTime, Utc};
+use chrono::naive::NaiveDate;
 use headless_chrome::browser::tab::ResponseHandler;
 use headless_chrome::protocol::cdp::Network::{GetResponseBodyReturnObject, ResourceType::Xhr};
 use headless_chrome::{Browser, LaunchOptions};
@@ -25,7 +25,9 @@ fn handle_reponse(page_count: AtomicUsize) -> ResponseHandler {
                 body: "empty".to_string(),
                 base_64_encoded: false,
             });
-            println!("Response: {:?}", response);
+            println!("response: {:?}", response.body);
+            let _: DrugProductData = serde_json::from_str(response.body.as_str()).unwrap();
+            // println!("product_data: {:?}", v);
             let count = page_count.fetch_add(1, Relaxed);
             println!("Page Count: {}", count);
         }
@@ -95,46 +97,27 @@ pub struct DrugProductData<'a> {
     data: Vec<DrugProduct<'a>>,
 }
 
-mod timestamp_format {
-    use chrono::{DateTime, Utc, NaiveDateTime};
+mod string_format {
     use serde::{self, Deserialize, Serializer, Deserializer};
 
-    const FORMAT: &'static str = "%Y-%m-%dT%H:%M:%S%z";
-
-    // The signature of a serialize_with function must follow the pattern:
-    //
-    //    fn serialize<S>(&T, S) -> Result<S::Ok, S::Error>
-    //    where
-    //        S: Serializer
-    //
-    // although it may also be generic over the input types T.
     pub fn serialize<S>(
-        date: &DateTime<Utc>,
+        s: &str,
         serializer: S,
     ) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let s = format!("{}", date.format(FORMAT));
         serializer.serialize_str(&s)
     }
 
-    // The signature of a deserialize_with function must follow the pattern:
-    //
-    //    fn deserialize<'de, D>(D) -> Result<T, D::Error>
-    //    where
-    //        D: Deserializer<'de>
-    //
-    // although it may also be generic over the output types T.
     pub fn deserialize<'de, D>(
         deserializer: D,
-    ) -> Result<DateTime<Utc>, D::Error>
+    ) -> Result<String, D::Error>
     where
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let dt = NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
-        Ok(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
+        Ok(s.trim().to_string())
     }
 }
 
@@ -187,11 +170,14 @@ struct DrugProduct<'a> {
     product_id: u64,
     ingredient_id: u64,
     manufacturer_id: u64,
+    #[serde(with = "string_format")]
     product_name: String,
     form_id: &'a str,
+    #[serde(with = "string_format")]
     strength: String,
     #[serde(rename(deserialize = "NAFDAC"))]
-    nafdac_reg_no: &'a str,
+    #[serde(with = "string_format")]
+    nafdac_reg_no: String,
     product_category_id: u32,
     marketing_category_id: u32,
     applicant_id: u64,
@@ -199,40 +185,50 @@ struct DrugProduct<'a> {
     approval_date: NaiveDate,
     #[serde(with = "date_format")]
     expiry_date: NaiveDate,
+    #[serde(with = "string_format")]
     product_description: String,
-    pack_size: &'a str,
-    atc: &'a str,
+    #[serde(with = "string_format")]
+    pack_size: String,
+    #[serde(with = "string_format")]
+    atc: String,
+    #[serde(with = "string_format")]
     smpc: String,
-    ingredient: Ingredient<'a>,
-    form: Form<'a>,
-    applicant: Applicant<'a>,
-    route: Route<'a>,
+    ingredient: Ingredient,
+    form: Form,
+    applicant: Applicant,
+    // TODO: figure out how to handle when this field is null
+    route: Route,
     status: &'a str, // should be enum
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Applicant<'a> {
+struct Applicant {
     id: u64,
-    name: &'a str,
+    #[serde(with = "string_format")]
+    name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Route<'a> {
+struct Route {
     id: u64,
-    name: &'a str,
+    #[serde(with = "string_format")]
+    name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Ingredient<'a> {
+struct Ingredient {
     #[serde(rename(deserialize = "ingredient_id"))]
     id: u32,
     #[serde(rename(deserialize = "ingredient_name"))]
+    #[serde(with = "string_format")]
     name: String,
-    synonym: &'a str,
+    #[serde(with = "string_format")]
+    synonym: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Form<'a> {
+struct Form {
     id: u32,       // form_id
-    name: &'a str, // form_name
+    #[serde(with = "string_format")]
+    name: String, // form_name
 }
