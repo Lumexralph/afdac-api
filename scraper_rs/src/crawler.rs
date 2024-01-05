@@ -25,9 +25,10 @@ fn handle_reponse(page_count: AtomicUsize) -> ResponseHandler {
                 body: "empty".to_string(),
                 base_64_encoded: false,
             });
-            println!("response: {:?}", response.body);
-            let _: DrugProductData = serde_json::from_str(response.body.as_str()).unwrap();
-            // println!("product_data: {:?}", v);
+
+            let v: DrugProductData = serde_json::from_str(response.body.as_str())
+                .unwrap_or(DrugProductData { data: vec![] });
+            println!("product_data: {:?}", v);
             let count = page_count.fetch_add(1, Relaxed);
             println!("Page Count: {}", count);
         }
@@ -98,21 +99,16 @@ pub struct DrugProductData<'a> {
 }
 
 mod string_format {
-    use serde::{self, Deserialize, Serializer, Deserializer};
+    use serde::{self, Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(
-        s: &str,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(s: &str, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         serializer.serialize_str(&s)
     }
 
-    pub fn deserialize<'de, D>(
-        deserializer: D,
-    ) -> Result<String, D::Error>
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<String, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -123,7 +119,7 @@ mod string_format {
 
 mod date_format {
     use chrono::NaiveDate;
-    use serde::{self, Deserialize, Serializer, Deserializer};
+    use serde::{self, Deserialize, Deserializer, Serializer};
 
     const FORMAT: &'static str = "%Y-%m-%d";
 
@@ -134,10 +130,7 @@ mod date_format {
     //        S: Serializer
     //
     // although it may also be generic over the input types T.
-    pub fn serialize<S>(
-        date: &NaiveDate,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(date: &NaiveDate, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -152,18 +145,23 @@ mod date_format {
     //        D: Deserializer<'de>
     //
     // although it may also be generic over the output types T.
-    pub fn deserialize<'de, D>(
-        deserializer: D,
-    ) -> Result<NaiveDate, D::Error>
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
     where
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let dt = NaiveDate::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
+        let parse_result = NaiveDate::parse_from_str(&s, FORMAT);
+        if parse_result.is_err() {
+            // If the date is out of range or otherwise malformed, use a default.
+            if let Some(dt) = NaiveDate::parse_from_str("2020-01-01", FORMAT).ok() {
+                return Ok(dt);
+            };
+            parse_result.map_err(serde::de::Error::custom)?;
+        }
+        let dt = parse_result.map_err(serde::de::Error::custom)?;
         Ok(dt)
     }
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 struct DrugProduct<'a> {
@@ -193,12 +191,11 @@ struct DrugProduct<'a> {
     atc: String,
     #[serde(with = "string_format")]
     smpc: String,
-    ingredient: Ingredient,
-    form: Form,
-    applicant: Applicant,
-    // TODO: figure out how to handle when this field is null
-    route: Route,
-    status: &'a str, // should be enum
+    ingredient: Option<Ingredient>,
+    form: Option<Form>,
+    applicant: Option<Applicant>,
+    route: Option<Route>,
+    status: &'a str,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -228,7 +225,7 @@ struct Ingredient {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Form {
-    id: u32,       // form_id
+    id: u32,
     #[serde(with = "string_format")]
-    name: String, // form_name
+    name: String,
 }
