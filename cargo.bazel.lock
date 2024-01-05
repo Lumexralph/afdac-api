@@ -1,5 +1,5 @@
 {
-  "checksum": "5104353cd813a5497ff6a0ad987eb0d7b0282ca3d8b6986018be8095af61cea8",
+  "checksum": "ac4902553e54f4fa4191c6b97fe52dbe3924901ea06880f65e9833b0707b94e3",
   "crates": {
     "addr2line 0.21.0": {
       "name": "addr2line",
@@ -256,6 +256,75 @@
         "version": "1.1.2"
       },
       "license": "Unlicense OR MIT"
+    },
+    "android-tzdata 0.1.1": {
+      "name": "android-tzdata",
+      "version": "0.1.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/android-tzdata/0.1.1/download",
+          "sha256": "e999941b234f3131b00bc13c22d06e8c5ff726d1b6318ac7eb276997bbb4fef0"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "android_tzdata",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "android_tzdata",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "0.1.1"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "android_system_properties 0.1.5": {
+      "name": "android_system_properties",
+      "version": "0.1.5",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/android_system_properties/0.1.5/download",
+          "sha256": "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "android_system_properties",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "android_system_properties",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "libc 0.2.151",
+              "target": "libc"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.5"
+      },
+      "license": "MIT/Apache-2.0"
     },
     "anyhow 1.0.76": {
       "name": "anyhow",
@@ -1048,6 +1117,90 @@
         "version": "1.0.0"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "chrono 0.4.31": {
+      "name": "chrono",
+      "version": "0.4.31",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/chrono/0.4.31/download",
+          "sha256": "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "chrono",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "chrono",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "android-tzdata",
+            "clock",
+            "default",
+            "iana-time-zone",
+            "js-sys",
+            "oldtime",
+            "std",
+            "wasm-bindgen",
+            "wasmbind",
+            "winapi",
+            "windows-targets"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "num-traits 0.2.17",
+              "target": "num_traits"
+            }
+          ],
+          "selects": {
+            "cfg(all(target_arch = \"wasm32\", not(any(target_os = \"emscripten\", target_os = \"wasi\"))))": [
+              {
+                "id": "js-sys 0.3.66",
+                "target": "js_sys"
+              },
+              {
+                "id": "wasm-bindgen 0.2.89",
+                "target": "wasm_bindgen"
+              }
+            ],
+            "cfg(target_os = \"android\")": [
+              {
+                "id": "android-tzdata 0.1.1",
+                "target": "android_tzdata"
+              }
+            ],
+            "cfg(unix)": [
+              {
+                "id": "iana-time-zone 0.1.59",
+                "target": "iana_time_zone"
+              }
+            ],
+            "cfg(windows)": [
+              {
+                "id": "windows-targets 0.48.5",
+                "target": "windows_targets"
+              }
+            ]
+          }
+        },
+        "edition": "2021",
+        "version": "0.4.31"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "cipher 0.4.4": {
       "name": "cipher",
@@ -3742,7 +3895,7 @@
       "version": "1.0.8",
       "repository": {
         "Git": {
-          "remote": "https://github.com/atroche/rust-headless-chrome",
+          "remote": "https://github.com/rust-headless-chrome/rust-headless-chrome",
           "commitish": {
             "Branch": "master"
           }
@@ -4649,6 +4802,143 @@
         "version": "0.5.0"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "iana-time-zone 0.1.59": {
+      "name": "iana-time-zone",
+      "version": "0.1.59",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/iana-time-zone/0.1.59/download",
+          "sha256": "b6a67363e2aa4443928ce15e57ebae94fd8949958fd1223c4cfc0cd473ad7539"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "iana_time_zone",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "iana_time_zone",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "fallback"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [],
+          "selects": {
+            "cfg(any(target_os = \"macos\", target_os = \"ios\"))": [
+              {
+                "id": "core-foundation-sys 0.8.6",
+                "target": "core_foundation_sys"
+              }
+            ],
+            "cfg(target_arch = \"wasm32\")": [
+              {
+                "id": "js-sys 0.3.66",
+                "target": "js_sys"
+              },
+              {
+                "id": "wasm-bindgen 0.2.89",
+                "target": "wasm_bindgen"
+              }
+            ],
+            "cfg(target_os = \"android\")": [
+              {
+                "id": "android_system_properties 0.1.5",
+                "target": "android_system_properties"
+              }
+            ],
+            "cfg(target_os = \"haiku\")": [
+              {
+                "id": "iana-time-zone-haiku 0.1.2",
+                "target": "iana_time_zone_haiku"
+              }
+            ],
+            "cfg(target_os = \"windows\")": [
+              {
+                "id": "windows-core 0.52.0",
+                "target": "windows_core"
+              }
+            ]
+          }
+        },
+        "edition": "2018",
+        "version": "0.1.59"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "iana-time-zone-haiku 0.1.2": {
+      "name": "iana-time-zone-haiku",
+      "version": "0.1.2",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/iana-time-zone-haiku/0.1.2/download",
+          "sha256": "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "iana_time_zone_haiku",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "iana_time_zone_haiku",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "iana-time-zone-haiku 0.1.2",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.2"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cc 1.0.83",
+              "target": "cc"
+            }
+          ],
+          "selects": {}
+        }
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "ident_case 1.0.1": {
       "name": "ident_case",
@@ -5777,6 +6067,68 @@
         "version": "1.0.4"
       },
       "license": "MIT"
+    },
+    "num-traits 0.2.17": {
+      "name": "num-traits",
+      "version": "0.2.17",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/num-traits/0.2.17/download",
+          "sha256": "39e3200413f237f41ab11ad6d161bc7239c84dcb631773ccd7de3dfe4b5c267c"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "num_traits",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "num_traits",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "num-traits 0.2.17",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.2.17"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "autocfg 1.1.0",
+              "target": "autocfg"
+            }
+          ],
+          "selects": {}
+        }
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "num_cpus 1.16.0": {
       "name": "num_cpus",
@@ -8563,6 +8915,14 @@
         "deps": {
           "common": [
             {
+              "id": "anyhow 1.0.76",
+              "target": "anyhow"
+            },
+            {
+              "id": "chrono 0.4.31",
+              "target": "chrono"
+            },
+            {
               "id": "failure 0.1.8",
               "target": "failure"
             },
@@ -8581,6 +8941,14 @@
             {
               "id": "scraper 0.18.1",
               "target": "scraper"
+            },
+            {
+              "id": "serde 1.0.193",
+              "target": "serde"
+            },
+            {
+              "id": "serde_json 1.0.108",
+              "target": "serde_json"
             },
             {
               "id": "tokio 1.35.1",
@@ -12542,6 +12910,45 @@
       },
       "license": "MIT/Apache-2.0"
     },
+    "windows-core 0.52.0": {
+      "name": "windows-core",
+      "version": "0.52.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/windows-core/0.52.0/download",
+          "sha256": "33ab640c8d7e35bf8ba19b884ba838ceb4fba93a4e8c65a9059d08afcfc683d9"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "windows_core",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "windows_core",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "windows-targets 0.52.0",
+              "target": "windows_targets"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.52.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "windows-sys 0.48.0": {
       "name": "windows-sys",
       "version": "0.48.0",
@@ -14161,6 +14568,9 @@
       "aarch64-apple-ios-sim"
     ],
     "cfg(all(target_arch = \"loongarch64\", target_os = \"linux\"))": [],
+    "cfg(all(target_arch = \"wasm32\", not(any(target_os = \"emscripten\", target_os = \"wasi\"))))": [
+      "wasm32-unknown-unknown"
+    ],
     "cfg(all(target_arch = \"x86\", target_env = \"gnu\", not(windows_raw_dylib)))": [
       "i686-unknown-linux-gnu"
     ],
@@ -14527,6 +14937,13 @@
       "wasm32-wasi"
     ],
     "cfg(target_feature = \"atomics\")": [],
+    "cfg(target_os = \"android\")": [
+      "aarch64-linux-android",
+      "armv7-linux-androideabi",
+      "i686-linux-android",
+      "x86_64-linux-android"
+    ],
+    "cfg(target_os = \"haiku\")": [],
     "cfg(target_os = \"hermit\")": [],
     "cfg(target_os = \"macos\")": [
       "aarch64-apple-darwin",
@@ -14643,11 +15060,15 @@
     ]
   },
   "direct_deps": [
+    "anyhow 1.0.76",
+    "chrono 0.4.31",
     "failure 0.1.8",
     "fantoccini 0.19.3",
     "headless_chrome 1.0.8",
     "reqwest 0.11.23",
     "scraper 0.18.1",
+    "serde 1.0.193",
+    "serde_json 1.0.108",
     "tokio 1.35.1"
   ],
   "direct_dev_deps": []
