@@ -105,7 +105,7 @@ mod string_format {
     where
         S: Serializer,
     {
-        serializer.serialize_str(&s)
+        serializer.serialize_str(s)
     }
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<String, D::Error>
@@ -121,7 +121,7 @@ mod date_format {
     use chrono::NaiveDate;
     use serde::{self, Deserialize, Deserializer, Serializer};
 
-    const FORMAT: &'static str = "%Y-%m-%d";
+    const FORMAT: &str = "%Y-%m-%d";
 
     // The signature of a serialize_with function must follow the pattern:
     //
@@ -153,7 +153,7 @@ mod date_format {
         let parse_result = NaiveDate::parse_from_str(&s, FORMAT);
         if parse_result.is_err() {
             // If the date is out of range or otherwise malformed, use a default.
-            if let Some(dt) = NaiveDate::parse_from_str("2020-01-01", FORMAT).ok() {
+            if let Ok(dt) = NaiveDate::parse_from_str("2020-01-01", FORMAT) {
                 return Ok(dt);
             };
             parse_result.map_err(serde::de::Error::custom)?;
