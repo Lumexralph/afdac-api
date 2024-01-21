@@ -22,10 +22,18 @@ load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencie
 
 crate_universe_dependencies()
 
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository")
+load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "crate")
 
 crates_repository(
     name = "crate_index",
+    annotations = {
+        "headless_chrome": [crate.annotation(
+            crate_features = [
+                "fetch",
+                "auto_generate_cdp/offline",
+            ],
+        )],
+    },
     cargo_lockfile = "//:Cargo.lock",
     lockfile = "//:cargo.bazel.lock",
     manifests = [

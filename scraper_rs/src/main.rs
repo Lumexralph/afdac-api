@@ -1,12 +1,21 @@
-use anyhow::Result;
+use std::env;
 
-use crate::crawler::{query, DrugProductData};
+use anyhow;
 
-pub mod crawler;
+use scraper_rs;
 
-fn main() -> Result<()> {
+include!(concat!(env!("OUT_DIR"), "/hello.rs"));
+
+fn main() -> anyhow::Result<()> {
+    println!("{}", message());
+    
+    match env::var("OUT_DIR") {
+        Ok(out_dir) => println!("The OUT_DIR is {}", out_dir),
+        Err(e) => println!("couldn't interpret: {e}"),
+    }
+
     let input = "100";
-    let res = query(input);
+    let res = scraper_rs::query(input);
     let product_data = r#"
     {
         "draw": 41,
@@ -5762,7 +5771,7 @@ fn main() -> Result<()> {
     "#;
 
     // Parse the string of data into serde_json::Value.
-    let _: DrugProductData = serde_json::from_str(product_data)?;
+    let _: scraper_rs::DrugProductData = serde_json::from_str(product_data)?;
     // println!("v: {:?}", v);
 
     res

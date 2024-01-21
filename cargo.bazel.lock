@@ -1,5 +1,5 @@
 {
-  "checksum": "ac4902553e54f4fa4191c6b97fe52dbe3924901ea06880f65e9833b0707b94e3",
+  "checksum": "b05d4096b12e14f3c37fae2ebbc23bb8934ba3f1fd496db3c9187fc0ce571bda",
   "crates": {
     "addr2line 0.21.0": {
       "name": "addr2line",
@@ -3897,7 +3897,7 @@
         "Git": {
           "remote": "https://github.com/rust-headless-chrome/rust-headless-chrome",
           "commitish": {
-            "Branch": "master"
+            "Branch": "main"
           }
         }
       },
@@ -3928,6 +3928,7 @@
         ],
         "crate_features": {
           "common": [
+            "auto_generate_cdp/offline",
             "default",
             "directories",
             "fetch",
@@ -8906,8 +8907,27 @@
       "name": "scraper_rs",
       "version": "0.1.0",
       "repository": null,
-      "targets": [],
-      "library_target_name": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "scraper_rs",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "scraper_rs",
       "common_attrs": {
         "compile_data_glob": [
           "**"
@@ -8943,6 +8963,10 @@
               "target": "scraper"
             },
             {
+              "id": "scraper_rs 0.1.0",
+              "target": "build_script_build"
+            },
+            {
               "id": "serde 1.0.193",
               "target": "serde"
             },
@@ -8959,6 +8983,11 @@
         },
         "edition": "2021",
         "version": "0.1.0"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
       },
       "license": null
     },
