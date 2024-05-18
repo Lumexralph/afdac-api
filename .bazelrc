@@ -1,1 +1,1 @@
-build --noenable_bzlmod
+common --noenable_bzlmod --explain=bazel_logs --verbose_explanations --verbose_failures
