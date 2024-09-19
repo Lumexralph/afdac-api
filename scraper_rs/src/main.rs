@@ -9,7 +9,7 @@ include!(concat!(env!("OUT_DIR"), "/hello.rs"));
 fn main() -> anyhow::Result<()> {
     println!("{}", message());
     
-    match env::var("OUT_DIR") {
+    match env::var("CARGO_MANIFEST_DIR") {
         Ok(out_dir) => println!("The OUT_DIR is {}", out_dir),
         Err(e) => println!("couldn't interpret: {e}"),
     }

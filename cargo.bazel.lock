@@ -1,5 +1,5 @@
 {
-  "checksum": "b05d4096b12e14f3c37fae2ebbc23bb8934ba3f1fd496db3c9187fc0ce571bda",
+  "checksum": "bc19191e17b6b48df3218064d933724f8b0924c43bddcd6760170c9d55c9b1ff",
   "crates": {
     "addr2line 0.21.0": {
       "name": "addr2line",
@@ -14515,7 +14515,9 @@
       "aarch64-pc-windows-msvc"
     ],
     "aarch64-unknown-linux-gnu": [
-      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu"
+    ],
+    "aarch64-unknown-nixos-gnu": [
       "aarch64-unknown-nixos-gnu"
     ],
     "aarch64-unknown-nto-qnx710": [
@@ -15081,7 +15083,9 @@
       "x86_64-unknown-freebsd"
     ],
     "x86_64-unknown-linux-gnu": [
-      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-linux-gnu"
+    ],
+    "x86_64-unknown-nixos-gnu": [
       "x86_64-unknown-nixos-gnu"
     ],
     "x86_64-unknown-none": [
